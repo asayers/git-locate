@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -eu
+
+function branches { git for-each-ref refs/heads --sort "-committerdate" | sed 's|.*refs/heads/||'; }
+function lookup_worktree { git worktree list | grep "\[$1\]" | sed 's/ .*//'; }
+function add_worktrees {
+    while read -r branch; do
+        worktree=$(lookup_worktree "$branch")
+        if [[ "$worktree" = '' ]]; then
+            echo "$branch"
+        else
+            printf "%-20s %s\n" "$branch" "$worktree"
+        fi
+    done
+}
+
+choice=$(branches | add_worktrees | fzy || true)
+branch=$(echo "$choice" | awk '{ print $1 }')
+worktree=$(echo "$choice" | awk '{ print $2 }')
+
+if [[ "$branch" = "" ]]; then
+    echo ".";
+elif [[ "$worktree" = "" ]]; then
+    git switch "$branch" >&2
+    echo "."
+else
+    echo "$worktree"
+fi
