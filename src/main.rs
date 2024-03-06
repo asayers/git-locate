@@ -16,6 +16,7 @@ fn main() -> anyhow::Result<()> {
         } else {
             let status = std::process::Command::new("git")
                 .args(["switch", &selection.name.shorten().to_string()])
+                .stdout(std::io::stderr())
                 .status()?;
             ensure!(status.success());
             println!(".");
