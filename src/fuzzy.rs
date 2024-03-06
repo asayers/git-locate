@@ -5,11 +5,7 @@ use crossterm::{
     terminal::{Clear, ClearType},
     QueueableCommand,
 };
-use std::{
-    fmt::Display,
-    io::{StdoutLock, Write},
-    sync::Arc,
-};
+use std::{fmt::Display, io::Write, sync::Arc};
 
 const OPTIONS_LIMIT: usize = 8;
 
@@ -24,9 +20,9 @@ where
             .push(x.clone(), |cols| cols[0] = x.to_string().into());
     }
 
-    let mut wtr = std::io::stdout().lock();
     crossterm::terminal::enable_raw_mode()?;
     let mut prompt = Prompt::default();
+    let mut wtr = std::io::stderr().lock();
 
     let ret = loop {
         matcher.tick(10);
@@ -73,7 +69,7 @@ where
 }
 
 fn print<T: Display>(
-    wtr: &mut StdoutLock,
+    mut wtr: impl Write,
     prompt: &Prompt,
     options: impl ExactSizeIterator<Item = T>,
 ) -> anyhow::Result<()> {
