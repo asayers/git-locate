@@ -1,5 +1,6 @@
 mod fuzzy;
 
+use anyhow::ensure;
 use gix::{date::Time, refs::FullName, Repository};
 use std::{collections::HashMap, fmt, path::PathBuf};
 
@@ -13,6 +14,10 @@ fn main() -> anyhow::Result<()> {
         if let Some(worktree) = &selection.worktree {
             println!("{}", worktree.display());
         } else {
+            let status = std::process::Command::new("git")
+                .args(["switch", &selection.name.shorten().to_string()])
+                .status()?;
+            ensure!(status.success());
             println!(".");
         }
     }
