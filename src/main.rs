@@ -20,6 +20,8 @@ fn main() -> anyhow::Result<()> {
             ensure!(status.success());
             println!(".");
         }
+    } else {
+        println!(".");
     }
 
     Ok(())
