@@ -33,6 +33,12 @@ struct Branch {
 }
 fn branches(repo: &Repository) -> anyhow::Result<Vec<Branch>> {
     let mut worktrees: HashMap<FullName, PathBuf> = HashMap::default();
+    {
+        let main_repo = repo.main_repo()?;
+        if let Some((head, dir)) = main_repo.head_name()?.zip(main_repo.work_dir()) {
+            worktrees.insert(head, dir.to_path_buf());
+        }
+    }
     for worktree in repo.worktrees()? {
         let dir = worktree.base()?;
         if let Some(head) = worktree.into_repo()?.head_name()? {
