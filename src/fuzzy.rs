@@ -38,16 +38,18 @@ where
             match prompt.handle_event(key) {
                 Action::Abort => break None,
                 Action::Select => {
-                    let selection = prompt.selection.rem_euclid(
-                        matcher
-                            .snapshot()
-                            .matched_item_count()
-                            .min(OPTIONS_LIMIT as u32) as isize,
-                    ) as u32;
-                    break matcher
+                    let n_options = matcher
                         .snapshot()
-                        .get_matched_item(selection)
-                        .map(|x| x.data.clone());
+                        .matched_item_count()
+                        .min(OPTIONS_LIMIT as u32) as isize;
+                    if n_options == 0 {
+                        continue;
+                    }
+                    let selection = prompt.selection.rem_euclid(n_options) as u32;
+                    match matcher.snapshot().get_matched_item(selection) {
+                        Some(x) => break Some(x.data.clone()),
+                        None => continue,
+                    }
                 }
                 Action::Continue => matcher.pattern.reparse(
                     0,
@@ -76,7 +78,11 @@ fn print<T: Display>(
     wtr.queue(MoveToColumn(0))?
         .queue(Clear(ClearType::FromCursorDown))?;
     let mut n = 0;
-    let selection = prompt.selection.rem_euclid(options.len() as isize) as usize;
+    let selection = if options.len() == 0 {
+        0
+    } else {
+        prompt.selection.rem_euclid(options.len() as isize) as usize
+    };
     for (i, x) in options.enumerate() {
         n += 1;
         writeln!(wtr)?;
