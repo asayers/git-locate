@@ -38,7 +38,7 @@ fn branches(repo: &Repository) -> anyhow::Result<Vec<Branch>> {
     let mut worktrees: HashMap<FullName, PathBuf> = HashMap::default();
     {
         let main_repo = repo.main_repo()?;
-        if let Some((head, dir)) = main_repo.head_name()?.zip(main_repo.work_dir()) {
+        if let Some((head, dir)) = main_repo.head_name()?.zip(main_repo.workdir()) {
             worktrees.insert(head, dir.to_path_buf());
         }
     }
@@ -49,7 +49,7 @@ fn branches(repo: &Repository) -> anyhow::Result<Vec<Branch>> {
         }
     }
     let mut branches = vec![];
-    for branch in repo.references()?.local_branches()?.peeled() {
+    for branch in repo.references()?.local_branches()?.peeled()? {
         let branch = branch.unwrap();
         let worktree = worktrees.remove(branch.name());
         let committer_time = branch.id().object()?.try_into_commit()?.time()?;

@@ -17,7 +17,7 @@ where
     for x in options {
         matcher
             .injector()
-            .push(x.clone(), |cols| cols[0] = x.to_string().into());
+            .push(x.clone(), |_, cols| cols[0] = x.to_string().into());
     }
 
     crossterm::terminal::enable_raw_mode()?;
